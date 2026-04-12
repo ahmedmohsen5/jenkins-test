@@ -1,0 +1,61 @@
+pipeline{
+    agent any
+    parameters{
+        string(name: 'PARAM1', defaultValue: 'default value', description: 'This is a parameter')
+        choice(name: 'PARAM2', choices: ['option1', 'option2', 'option3'], description: 'This is a list parameter')
+    }
+    environment{
+        ENV_VAR1 = "This is an environment variable"
+    }
+    stages{
+        stage("A"){
+            agent{
+                label "agent2"
+            }
+            steps{
+                echo "========executing A========"
+                sh 'hostname'
+            }
+            post{
+                always{
+                    echo "params.PARAM1: ${params.PARAM1}"
+                    echo "params.PARAM2: ${params.PARAM2}"
+                }
+                success{
+                    echo "========A executed successfully========"
+                }
+                failure{
+                    echo "========A execution failed========"
+                }
+            }
+        }
+        stage("B"){
+            steps{
+                echo "========executing B========"
+                sh 'hostname'
+            }
+            post{
+                always{
+                    echo env.ENV_VAR1
+                }
+                success{
+                    echo "========B executed successfully========"
+                }
+                failure{
+                    echo "========B execution failed========"
+                }
+            }
+        }
+    }
+    post{
+        always{
+            echo "========always========"
+        }
+        success{
+            echo "========pipeline executed successfully ========"
+        }
+        failure{
+            echo "========pipeline execution failed========"
+        }
+    }
+}
