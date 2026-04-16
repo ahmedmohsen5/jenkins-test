@@ -29,27 +29,23 @@ pipeline{
                 }
             }
         }
-        stage("B"){
+        stage("build"){
             steps{
-                echo "========executing B========"
-                sh 'hostname'
-            }
-            post{
-                always{
-                    echo env.ENV_VAR1
-                }
-                success{
-                    echo "========B executed successfully========"
-                }
-                failure{
-                    echo "========B execution failed========"
-                }
+                sh 'mkdir -p dist && echo "compiled" >> dist/app.txt'
+                stash name: 'build', includes: 'dist/**'
             }
         }
+        stage('test'){
+            steps{
+                unstable 'build'
+                sh 'cat dist/app.txt'
+            }
+        }
+
     }
     post{
         always{
-            echo "========always========"
+           echo 'test'
         }
         success{
             echo "========pipeline executed successfully ========"
